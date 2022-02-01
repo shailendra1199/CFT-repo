@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: PUBLIC and PRIVATE VPC
+Parameters:
+  VPCCIDR:
+    Description: Enter vpccidr 
+    Type: String
+    Default: 10.33.0.0/16
+  EnableDnsHostnames:
+    Default: true
+    Type: String
+    AllowedValues: [true, false]
+  EnableDnsSupport: 
+    Default: true
+    Type: String
+    AllowedValues: [true, false]
+  PrivateSubnet1Value:
+    Description: Enter the PublicSubnet3 CIDR  
+    Type: String
+    Default: 10.33.1.0/24
+  PrivateSubnet2Value:
+    Description: Enter the PublicSubnet4 CIDR  
+    Type: String
+    Default: 10.33.2.0/24
+
+
+Resources:
+  PrivateVPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Ref VPCCIDR
+      EnableDnsHostnames: !Ref EnableDnsHostnames
+      EnableDnsSupport: !Ref EnableDnsSupport
+
+
+  PrivateSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref PrivateVPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: !Ref PrivateSubnet1Value
+      MapPublicIpOnLaunch: false
+
+  PrivateSubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref PrivateVPC
+      AvailabilityZone: us-east-1b
+      CidrBlock: !Ref PrivateSubnet2Value
+      MapPublicIpOnLaunch: false
+
+  PrivateRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref PrivateVPC
+      Tags:
+        - Key: Network
+          Value: Private
+  
+  PrivateSubnet1RouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnet2RouteTableAssociation:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref PrivateRouteTable
